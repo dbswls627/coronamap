@@ -1,7 +1,7 @@
-package com.jo.coronamap
+package com.jo.coronamap.hilt
 
-import com.google.gson.internal.GsonBuildConfig
 import com.jo.coronamap.CoronaAPI
+import com.jo.coronamap.Util
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,17 +1,15 @@
-/*
-package com.jo.kisapi
+package com.jo.coronamap
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.jo.kisapi.dataModel.AutoTrading
-import com.jo.kisapi.dataModel.TokenTime
-import kotlinx.coroutines.CoroutineScope
+import com.jo.coronamap.dataModel.Corona
 
-@Database(entities = [TokenTime::class, AutoTrading::class], version = 2)
+
+@Database(entities = [Corona::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun TokenTimeDao(): TokenTimeDao
+    abstract fun DataDao(): DataDao
     companion object {
         private var INSTANCE: AppDatabase? = null
 
@@ -19,7 +17,7 @@ abstract class AppDatabase : RoomDatabase() {
             if (INSTANCE == null) {
                 synchronized(AppDatabase::class) {
                     INSTANCE = Room.databaseBuilder(context.applicationContext,
-                        AppDatabase::class.java, "TokenTime.db")
+                        AppDatabase::class.java, "Data.db")
                         .fallbackToDestructiveMigration().allowMainThreadQueries()
                         .build()
                 }
@@ -29,4 +27,3 @@ abstract class AppDatabase : RoomDatabase() {
     }
 }
 
-    */

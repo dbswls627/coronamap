@@ -39,6 +39,8 @@ android {
 }
 
 dependencies {
+    //스플래쉬
+    implementation("androidx.core:core-splashscreen:1.0.0-beta01")
     // Ted Permission
     implementation 'io.github.ParkSangGwon:tedpermission-normal:3.3.0'
     //NaverMap
@@ -68,4 +70,5 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    api 'com.google.android.gms:play-services-location:15.0.1'
 }

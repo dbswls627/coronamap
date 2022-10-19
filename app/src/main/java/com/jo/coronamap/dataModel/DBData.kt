@@ -18,8 +18,8 @@ data class Corona(
     var centerName:String,
     var centerType:String,
     var facilityName:String,
-    var lat:String,
-    var lng:String,
+    var lat:Double,
+    var lng:Double,
     var phoneNumber:String,
     var updatedAt:String,
 )
