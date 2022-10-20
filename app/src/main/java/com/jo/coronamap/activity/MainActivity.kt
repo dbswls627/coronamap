@@ -85,14 +85,22 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
         })
 
         binding.button.setOnClickListener {
-            setUpdateLocationListener() //내위치를 가져오는 코드
+            setUpdateLocationListener()
         }
     }
-    //내 위치를 가져오는 코드
+
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient //자동으로 gps값을 받아온다.
     lateinit var locationCallback: LocationCallback //gps응답 값을 가져온다.
+
+
+
     @UiThread
     override fun onMapReady(naverMap: NaverMap) {
+
+        //맵 클릭시 정보창 없애기
+        naverMap.setOnMapClickListener { pointF, latLng ->
+            viewModel.fName.value=""
+        }
         this.naverMap = naverMap
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this) //gps 자동으로 받아오기
