@@ -36,12 +36,14 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
     private lateinit var naverMap: NaverMap
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
+    var markerList = ArrayList<Marker>()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
-
 
 
         /* val content: View = binding.root
@@ -97,9 +99,12 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
     @UiThread
     override fun onMapReady(naverMap: NaverMap) {
 
+
         //맵 클릭시 정보창 없애기
         naverMap.setOnMapClickListener { pointF, latLng ->
             viewModel.fName.value=""
+            setMarker()
+
         }
         this.naverMap = naverMap
         fusedLocationProviderClient =
@@ -107,16 +112,20 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
         setUpdateLocationListener() //내위치를 가져오는 코드
 
         viewModel.list.value!!.forEach {
+
             val marker = Marker()
+            markerList.add(marker)
             marker.position = LatLng(it.lat,it.lng)
             marker.icon = MarkerIcons.BLACK
+
             if (it.centerType == "중앙/권역"){
                 marker.iconTintColor = Color.RED
             }else{
                 marker.iconTintColor = Color.GREEN
             }
+            setMarker()
 
-            marker.map = naverMap
+
 
           /*  val infoWindow = InfoWindow()
             //네이버맵 제공 정보창
@@ -138,21 +147,37 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
                 if ( viewModel.fName.value.isNullOrEmpty() || viewModel.fName.value!=it.facilityName) {
                     // 정보창이 비어있거나 다른 마커를 클릭 했을 때
                     viewModel.setInfo(it)
+
+                    setMarker()
+
+                    marker.width = 75
+                    marker.height = 120
+
                     cameraUpdate = CameraUpdate.scrollTo(LatLng(it.lat, it.lng))    //카메라이동
                     naverMap.moveCamera(cameraUpdate)
                     //infoWindow.open(marker)
                 } else {
                     // 열어있는 정보창의 마커를 클릭 했을 때
+                    setMarker()
                     viewModel.fName.value = ""
                     //infoWindow.close()
                 }
 
                 true
             }
+            marker.map = naverMap
             marker.onClickListener = listener
         }
 
     }
+
+    fun setMarker() {
+        markerList.forEach {
+            it.width = 50
+            it.height = 80
+        }
+    }
+
 
     @SuppressLint("MissingPermission")
     fun setUpdateLocationListener() {
