@@ -11,11 +11,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(private val repository: Repository) : ViewModel() {
-    /*   fun getList() {
-           viewModelScope.launch {
-               Log.d("test", repository.getList("1").list.toString())
-           }
-       }*/
+
     val list = MutableLiveData<List<Corona>>()
     val centerName = MutableLiveData<String>()
     val fName = MutableLiveData<String>()
@@ -23,11 +19,7 @@ class MainViewModel @Inject constructor(private val repository: Repository) : Vi
     val phoneNumber = MutableLiveData<String>()
     val update = MutableLiveData<String>()
 
-    fun saveList() {
-        viewModelScope.launch {
-            repository.saveList()
-        }
-    }
+
 
     fun getList() {
         viewModelScope.launch {

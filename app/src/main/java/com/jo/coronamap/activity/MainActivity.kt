@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
                  }
              }
          )*/
-        viewModel.saveList()
+
         viewModel.getList()
         init()
         requestPermission {}

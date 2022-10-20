@@ -12,12 +12,10 @@ class Repository @Inject constructor(private val dataDao: DataDao, private val c
         Util.API_KEY_SECRET
     )
 
-    suspend fun saveList(){
-        (1..10).forEach {
-            getList(it.toString()).list.forEach {
+    suspend fun saveList(page: String){
+            getList(page).list.forEach {
                 dataDao.insert(it)
             }
-        }
     }
 
     suspend fun getList() = dataDao.getList()
