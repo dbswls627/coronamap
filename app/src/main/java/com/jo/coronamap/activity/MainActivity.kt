@@ -150,8 +150,8 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
 
                     setMarker()
 
-                    marker.width = 75
-                    marker.height = 120
+                    marker.width = 100
+                    marker.height = 160
 
                     cameraUpdate = CameraUpdate.scrollTo(LatLng(it.lat, it.lng))    //카메라이동
                     naverMap.moveCamera(cameraUpdate)
