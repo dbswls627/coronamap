@@ -39,8 +39,6 @@ android {
 }
 
 dependencies {
-    //스플래쉬
-    implementation("androidx.core:core-splashscreen:1.0.0-beta01")
     // Ted Permission
     implementation 'io.github.ParkSangGwon:tedpermission-normal:3.3.0'
     //NaverMap

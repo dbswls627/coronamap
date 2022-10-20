@@ -2,90 +2,101 @@ package com.jo.coronamap.activity
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.graphics.Color
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
+import android.location.Location
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.view.ViewTreeObserver
-import android.view.animation.AnticipateInterpolator
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.UiThread
-import androidx.core.animation.doOnEnd
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.*
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 import com.gun0912.tedpermission.provider.TedPermissionProvider.context
-import com.jo.coronamap.viewModel.MainViewModel
 import com.jo.coronamap.R
 import com.jo.coronamap.databinding.ActivityMainBinding
+import com.jo.coronamap.viewModel.MainViewModel
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.InfoWindow
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.Overlay
-import com.naver.maps.map.util.FusedLocationSource
+import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.MarkerIcons
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() , OnMapReadyCallback {
 
+    private lateinit var naverMap: NaverMap
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
 
-        val content: View = binding.root
-        content.viewTreeObserver.addOnPreDrawListener(
-            object : ViewTreeObserver.OnPreDrawListener {
-                override fun onPreDraw(): Boolean {
-                    // Check if the initial data is ready.
-                    return if (viewModel.isReady) {
-                        // The content is ready; start drawing.
-                        content.viewTreeObserver.removeOnPreDrawListener(this)
-                        true
-                    } else {
-                        lifecycleScope.launch {
-                            if ( viewModel.b) {
-                                viewModel.b = false
-                                viewModel.saveList()
-                                delay(2000)
-                                viewModel.isReady = true
-                            }
-                        }
-                        false
-                        
-                    }
-                }
-            }
-        )
-        Log.d("test","Test")
 
+        /* val content: View = binding.root
+         content.viewTreeObserver.addOnPreDrawListener(
+             object : ViewTreeObserver.OnPreDrawListener {
+                 override fun onPreDraw(): Boolean {
+                     // Check if the initial data is ready.
+                     return if (viewModel.isReady) {
+                         // The content is ready; start drawing.
+                         content.viewTreeObserver.removeOnPreDrawListener(this)
+                         viewModel.getList()
+                         init()
+                         true
+                     } else {
+                         lifecycleScope.launch {
+                             if ( viewModel.b) {
+                                 viewModel.b = false
+                                 viewModel.saveList()
+                                 delay(2000)
+                                 viewModel.isReady = true
+                             }
+                         }
+                         false
+
+                     }
+                 }
+             }
+         )*/
+        viewModel.saveList()
         viewModel.getList()
-
-        requestPermission{}
         init()
+        requestPermission {}
 
+        viewModel.fName.observe(this,{
+            Log.d("test",viewModel.fName.value.toString())
+            if (viewModel.fName.value.isNullOrEmpty()){
+                binding.info.visibility= View.GONE
+            }else{
+                binding.info.visibility= View.VISIBLE
+            }
+        })
 
-
+        binding.button.setOnClickListener {
+            setUpdateLocationListener() //내위치를 가져오는 코드
+        }
     }
+    //내 위치를 가져오는 코드
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient //자동으로 gps값을 받아온다.
+    lateinit var locationCallback: LocationCallback //gps응답 값을 가져온다.
     @UiThread
     override fun onMapReady(naverMap: NaverMap) {
+        this.naverMap = naverMap
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(this) //gps 자동으로 받아오기
+        setUpdateLocationListener() //내위치를 가져오는 코드
 
         viewModel.list.value!!.forEach {
             val marker = Marker()
@@ -99,8 +110,8 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
 
             marker.map = naverMap
 
-            val infoWindow = InfoWindow()
-
+          /*  val infoWindow = InfoWindow()
+            //네이버맵 제공 정보창
             infoWindow.adapter = object : InfoWindow.DefaultTextAdapter(context) {
 
                 override fun getText(infoWindow: InfoWindow): CharSequence {
@@ -112,22 +123,63 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
 
                 }
             }
-
+*/
             val listener = Overlay.OnClickListener { overlay ->
-                val marker = overlay as Marker
+                val cameraUpdate: CameraUpdate
 
-                if (marker.infoWindow == null) {
-                    // 현재 마커에 정보 창이 열려있지 않을 경우 엶
-                    infoWindow.open(marker)
+                if ( viewModel.fName.value.isNullOrEmpty() || viewModel.fName.value!=it.facilityName) {
+                    // 정보창이 비어있거나 다른 마커를 클릭 했을 때
+                    viewModel.setInfo(it)
+                    cameraUpdate = CameraUpdate.scrollTo(LatLng(it.lat, it.lng))    //카메라이동
+                    naverMap.moveCamera(cameraUpdate)
+                    //infoWindow.open(marker)
                 } else {
-                    // 이미 현재 마커에 정보 창이 열려있을 경우 닫음
-                    infoWindow.close()
+                    // 열어있는 정보창의 마커를 클릭 했을 때
+                    viewModel.fName.value = ""
+                    //infoWindow.close()
                 }
 
                 true
             }
             marker.onClickListener = listener
         }
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun setUpdateLocationListener() {
+        val locationRequest = LocationRequest.create()
+        locationRequest.run {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY //높은 정확도
+        }
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                for ((i, location) in locationResult.locations.withIndex()) {
+                    Log.d("location: ", "${location.latitude}, ${location.longitude}")
+                    setLastLocation(location)
+                }
+            }
+        }
+
+        fusedLocationProviderClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.myLooper()
+        )
+    }//좌표계를 주기적으로 갱신
+
+    fun setLastLocation(location: Location) {
+        val myLocation = LatLng(location.latitude, location.longitude)
+        val marker = Marker()
+        marker.position = myLocation
+
+        marker.map = naverMap
+        marker.icon = OverlayImage.fromResource(R.drawable.ic_baseline_circle_24)
+        val cameraUpdate = CameraUpdate.scrollTo(myLocation)
+        naverMap.moveCamera(cameraUpdate)
+
 
     }
 
@@ -156,6 +208,7 @@ class MainActivity : AppCompatActivity() , OnMapReadyCallback {
     }
 
     private fun init(){
+        binding.info.visibility= View.GONE
         val fm = supportFragmentManager
         var mapFragment = fm.findFragmentById(R.id.map) as MapFragment?
             ?: MapFragment.newInstance().also {

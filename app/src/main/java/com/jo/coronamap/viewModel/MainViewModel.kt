@@ -17,8 +17,11 @@ class MainViewModel @Inject constructor(private val repository: Repository) : Vi
            }
        }*/
     val list = MutableLiveData<List<Corona>>()
-    var isReady = false
-    var b = true
+    val centerName = MutableLiveData<String>()
+    val fName = MutableLiveData<String>()
+    val address = MutableLiveData<String>()
+    val phoneNumber = MutableLiveData<String>()
+    val update = MutableLiveData<String>()
 
     fun saveList() {
         viewModelScope.launch {
@@ -29,6 +32,16 @@ class MainViewModel @Inject constructor(private val repository: Repository) : Vi
     fun getList() {
         viewModelScope.launch {
             list.value = repository.getList()
+        }
+    }
+
+    fun setInfo(corona: Corona) {
+        viewModelScope.launch {
+            centerName.value = corona.centerName
+            fName.value = corona.facilityName
+            address.value = corona.address
+            phoneNumber.value = corona.phoneNumber
+            update.value = corona.updatedAt
         }
     }
 }
