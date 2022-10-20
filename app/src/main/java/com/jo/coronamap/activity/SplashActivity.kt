@@ -26,13 +26,16 @@ class SplashActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
-        val intent = Intent(this,MainActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
 
+        viewModel.setProgress80()
 
-        CoroutineScope(Dispatchers.Default).launch {
-            viewModel.saveList()
-            delay(2000)
-            startActivity(intent)
-        }
+        viewModel.progress.observe(this,{
+            if (viewModel.progress.value==100){
+                startActivity(intent)
+            }
+        })
+
+        viewModel.saveList()
     }
 }

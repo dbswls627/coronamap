@@ -16,6 +16,7 @@
         tools:context=".activity.SplashActivity">
 
         <ProgressBar
+            android:progress="@{viewModel.progress}"
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
