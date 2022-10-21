@@ -33,6 +33,7 @@ class SplashActivity : AppCompatActivity() {
         viewModel.progress.observe(this,{
             if (viewModel.progress.value==100){
                 startActivity(intent)
+                finish()
             }
         })
 
